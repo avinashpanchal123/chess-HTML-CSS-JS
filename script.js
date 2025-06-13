@@ -9,9 +9,9 @@ let initialLayout = [
     ['','','','','','','',''],
     ['wp','wp','wp','wp','wp','wp','wp','wp'],
     ['wr','wn','wb','wq','wk','wb','wn','wr'],
-  ];
+];
 
-
+let currentLayout = JSON.parse(JSON.stringify(initialLayout)); 
 
 function createChessBoard() {
     let chess_container = document.getElementById("chess_container");
@@ -24,14 +24,13 @@ function createChessBoard() {
             cell.dataset.row = row;
             cell.dataset.col = col;
 
-            // Alternate coloring
             if ((row + col) % 2 === 1) {
                 cell.classList.add("green_cell");
             }
 
-            if(initialLayout[row][col] !== ''){
+            if(currentLayout[row][col] !== ''){
                let piece = document.createElement("img");
-               piece.src = `./images/${initialLayout[row][col]}.png`;
+               piece.src = `./images/${currentLayout[row][col]}.png`;
                piece.classList.add('piece')
                cell.appendChild(piece)
             }
@@ -46,32 +45,48 @@ function handleClick(e){
     let cell = e.currentTarget;
     let row = parseInt(cell.dataset.row);
     let col = parseInt(cell.dataset.col);
-    let piece = initialLayout[row][col];
+    let piece = currentLayout[row][col];
     if(piece == "bp" || piece == "wp"){
         showPawnMoves(row, col, piece)
     }
+    else if(piece == "bn" || piece == "wn"){
+        showKnightMoves(row, col, piece)
+    }
 }
-
 
 function showPawnMoves(row, col, piece){
     clearHighlight()
     let direction = (piece === 'bp') ? 1 : -1; 
     let startRow = (piece === 'bp') ? 1 : 6;
     let nextRow = row + direction;
-    if(isBound(nextRow, col) && initialLayout[nextRow][col] === ''){
+    if(isBound(nextRow, col) && currentLayout[nextRow][col] === ''){
         highlightCell(nextRow, col)
         if( row == startRow ){
             highlightCell((startRow + (2 * direction)), col)
         }
     }
-
-    if(initialLayout[nextRow][col+1] == '' || initialLayout[nextRow][col-1]){
-
-    }
 }
 
-function showKnightMoves(){
-
+function showKnightMoves(row, col, piece){
+    clearHighlight()
+    console.log(isBound(row + 2, col + 1), 'checking');
+    
+    if(!!isBound(row + 2, col + 1)){
+        if((currentLayout[row + 2][col + 1] === '') || isOpponentPiece(piece, currentLayout[row + 2][col + 1]))
+            highlightCell(row + 2, col + 1)
+    }
+    if(!!isBound(row + 2, col - 1)){
+        if((currentLayout[row + 2][col - 1] === '') || isOpponentPiece(piece, currentLayout[row + 2][col - 1]))
+            highlightCell(row + 2, col - 1)
+    }
+    if(!!isBound(row - 2, col + 1)){
+        if((currentLayout[row - 2][col + 1] === '') || isOpponentPiece(piece, currentLayout[row - 2][col + 1]))
+           highlightCell(row - 2, col + 1)
+    }
+    if(!!isBound(row - 2, col - 1)){
+        if ((currentLayout[row - 2][col - 1] === '') || isOpponentPiece(piece, currentLayout[row - 2][col - 1]))
+              highlightCell(row - 2, col - 1)
+    }
 }
 
 function highlightCell(row, col){
@@ -88,7 +103,6 @@ function clearHighlight(){
     })
 }
 
-
 function isBound(row, col) {
     if (row > -1 && row < 8 && col > -1 && col < 8) {
         return true
@@ -96,5 +110,8 @@ function isBound(row, col) {
     return false
 }
 
+function isOpponentPiece(current, target){
+    return ( current[0] !== target[0] );
+}
 
 createChessBoard()
